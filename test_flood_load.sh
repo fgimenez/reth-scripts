@@ -4,7 +4,7 @@
 set -e
 
 # Configuration
-REFERENCE_RPC="${REFERENCE_RPC:-https://eth-mainnet.g.alchemy.com/v2/6HXPkRoiSMHGN-W96Ctp5H9VI1uIb-6j}"
+REFERENCE_RPC="${REFERENCE_RPC:-http://localhost:8546}"
 TEST_RPC="${TEST_RPC:-http://localhost:8545}"
 OUTPUT_DIR="${OUTPUT_DIR:-./flood-load-$(date +%Y%m%d-%H%M%S)}"
 
@@ -45,10 +45,10 @@ run_load_test() {
     local from_block=$4
     local to_block=$5
     local description=$6
-    
+
     echo -e "${YELLOW}Running: $description on $endpoint_name${NC}"
     echo "Blocks: $from_block to $to_block ($(($to_block - $from_block + 1)) blocks)"
-    
+
     # Create request file
     cat > "$OUTPUT_DIR/${test_name}_request.json" <<EOF
 {
@@ -62,9 +62,9 @@ run_load_test() {
     "id": 1
 }
 EOF
-    
+
     echo "Running flood..."
-    
+
     # Run flood test
     flood eth_getLogs \
         "${endpoint_name}=${endpoint}" \
@@ -73,7 +73,7 @@ EOF
         --output "$OUTPUT_DIR/${test_name}_${endpoint_name}" \
         --vegeta-args="-body=$OUTPUT_DIR/${test_name}_request.json" \
         2>&1 | tee "$OUTPUT_DIR/${test_name}_${endpoint_name}.log"
-    
+
     echo -e "${GREEN}✓ Completed${NC}"
     echo ""
 }
@@ -109,7 +109,7 @@ echo ""
 
 for test in "test1_small" "test2_threshold" "test3_large"; do
     echo -e "${YELLOW}$test results:${NC}"
-    
+
     for endpoint in "reference" "test"; do
         if [ -f "$OUTPUT_DIR/${test}_${endpoint}/summary.json" ]; then
             echo -n "$endpoint: "
